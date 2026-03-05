@@ -16,12 +16,12 @@ public struct PaginationAsyncView<UI: Paginateable, Content: View>: View {
     @Dependency(\.loggingService) private var loggingService
     
     @State private var store: StoreOf<AsyncFeature<UI>>
-    @ViewBuilder let content: (UI) -> Content
+    @ViewBuilder let content: (Binding<UI>) -> Content
     @State private var loadingMore = false
     
     public init(
         endpoint: DataAccessor<UI>,
-        @ViewBuilder content: @escaping (UI) -> Content
+        @ViewBuilder content: @escaping (Binding<UI>) -> Content
     ) {
         self.store = StoreOf<AsyncFeature<UI>>(initialState: .init(accessor: endpoint)) {
             AsyncFeature()
@@ -46,7 +46,7 @@ public struct PaginationAsyncView<UI: Paginateable, Content: View>: View {
                 
             case .success(let ui):
                 LazyVStack(spacing: 16) {
-                    content(ui)
+                    content($store.value)
                     
                     if let cursor = ui.cursor, !loadingMore {
                         ProgressView()

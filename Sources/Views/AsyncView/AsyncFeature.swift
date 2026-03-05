@@ -16,6 +16,7 @@ import SwiftUI
 @Reducer
 public struct AsyncFeature<UI: DataAccessObject>: Sendable {
     @Dependency(\.dataService) private var dataAccessService
+    @Dependency(\.codableStorageService) private var codableStorageService
     @Dependency(\.loggingService) private var loggingService
     
     @ObservableState
@@ -23,12 +24,18 @@ public struct AsyncFeature<UI: DataAccessObject>: Sendable {
         let accessor: DataAccessor<UI>
         public var loadState: LoadState<UI> = .idle
         
-        public var value: UI? {
-            loadState.value
+        public var value: UI {
+            get {
+                loadState.value ?? .sample
+            } set {
+                loadState = .success(newValue)
+            }
         }
     }
     
     public var body: some Reducer<State, Action> {
+        BindingReducer()
+        
         Reduce { state, action in
             switch action {
             case .observe:
@@ -63,13 +70,27 @@ public struct AsyncFeature<UI: DataAccessObject>: Sendable {
                 
             case .setLoadState(let loadState):
                 state.loadState = loadState
+                
+            case .binding:
+                guard let cacheId = state.accessor.cacheId else {
+                    return .none
+                }
+                
+                return .run { [value = state.value] _ in
+                    do {
+                        try await self.codableStorageService.save(value, id: cacheId)
+                    } catch {
+                        self.loggingService.error(error.localizedDescription)
+                    }
+                }
             }
             
             return .none
         }
     }
     
-    public enum Action {
+    public enum Action: BindableAction {
+        case binding(BindingAction<State>)
         case load(refresh: Bool = false)
         case observe
         case setLoadState(LoadState<UI>)

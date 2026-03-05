@@ -17,8 +17,8 @@ actor InFlightRequestStore {
     
     func run<T>(key: String, operation: @Sendable @escaping () async throws -> T) async throws -> T {
         if let existing = tasks[key] {
-            let value = try await existing.value
-            guard let typed = value as? T else {
+            let payload = try await existing.value
+            guard let typed = payload.value as? T else {
                 throw GenericError(message: "In-flight response type mismatch.")
             }
             return typed

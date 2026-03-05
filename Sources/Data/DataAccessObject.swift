@@ -8,7 +8,7 @@
 import VLCache
 import Foundation
 
-public protocol DataAccessObject: Codable, Sendable, Sampleable, Cacheable {}
+public protocol DataAccessObject: Codable, Sendable, Sampleable, Cacheable, Equatable {}
 
 extension AttributedString: DataAccessObject {
     public static let sample: AttributedString = AttributedString()

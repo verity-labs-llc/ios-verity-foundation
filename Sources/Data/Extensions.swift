@@ -8,5 +8,9 @@
 import VLSharedModels
 
 extension EmptyResponse: DataAccessObject {
+    public static func == (lhs: EmptyResponse, rhs: EmptyResponse) -> Bool {
+        true
+    }
+    
     static public let sample = EmptyResponse()
 }

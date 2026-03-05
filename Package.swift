@@ -112,6 +112,19 @@ let package = Package(
                 .target(name: "VLSharedModels"),
             ],
             path: "Sources/Views"
+        ),
+        .testTarget(
+            name: "VerityLabsFoundationTests",
+            dependencies: [
+                .target(name: "VLExtensions"),
+                .target(name: "VLCache"),
+                .target(name: "VLData"),
+                .target(name: "VLSharedModels"),
+                .target(name: "VLHTTP"),
+                .target(name: "VLFiles"),
+                .target(name: "VLUtilities"),
+            ],
+            path: "Tests/VerityLabsFoundationTests"
         )
     ]
 )

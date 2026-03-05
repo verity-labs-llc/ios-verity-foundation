@@ -11,7 +11,9 @@ import Foundation
 public actor Debouncer {
     private var tasks = [String: Date]()
     
-    public func debounce(id: String, duration: TimeInterval, block: @escaping () async -> Void) async {
+    public init() {}
+    
+    public func debounce(id: String, duration: TimeInterval, block: @escaping @Sendable () async -> Void) async {
         if let executeDate = self.tasks[id], executeDate > .now {
             return
         } else {
