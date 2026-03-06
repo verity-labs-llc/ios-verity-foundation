@@ -24,18 +24,20 @@ public struct AsyncFeature<UI: DataAccessObject>: Sendable {
         let accessor: DataAccessor<UI>
         public var loadState: LoadState<UI> = .idle
         
-        public var value: UI {
+        public var value: UI? {
             get {
-                loadState.value ?? .sample
+                loadState.value
             } set {
-                loadState = .success(newValue)
+                if let newValue {
+                    loadState = .success(newValue)
+                }
             }
         }
     }
     
     public var body: some Reducer<State, Action> {
+        LoggingReducer()
         BindingReducer()
-        
         Reduce { state, action in
             switch action {
             case .observe:
@@ -77,10 +79,12 @@ public struct AsyncFeature<UI: DataAccessObject>: Sendable {
                 }
                 
                 return .run { [value = state.value] _ in
-                    do {
-                        try await self.codableStorageService.save(value, id: cacheId)
-                    } catch {
-                        self.loggingService.error(error.localizedDescription)
+                    if let value {
+                        do {
+                            try await self.codableStorageService.save(value, id: cacheId)
+                        } catch {
+                            self.loggingService.error(error.localizedDescription)
+                        }
                     }
                 }
             }

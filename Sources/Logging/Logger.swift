@@ -36,8 +36,27 @@ final class LoggingServiceLiveValue: LoggingService {
     }
 }
 
+final class LoggingServicePreviewValue: LoggingService {
+    func debug(_ message: String) {
+        print("[DEBUG] \(message)")
+    }
+    
+    func info(_ message: String) {
+        print("[INFO] \(message)")
+    }
+    
+    func error(_ message: String) {
+        print("[ERROR] \(message)")
+    }
+    
+    func critical(_ message: String) {
+        print("[CRITICAL] \(message)")
+    }
+}
+
 public enum LoggingServiceKey: DependencyKey {
     public static let liveValue: LoggingService = LoggingServiceLiveValue()
+    public static let previewValue: LoggingService = LoggingServicePreviewValue()
 }
 
 public extension DependencyValues {

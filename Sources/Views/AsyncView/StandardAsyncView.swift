@@ -30,7 +30,9 @@ public struct StandardAsyncView<UI: DataAccessObject, Content: View>: View {
             case .idle, .loading:
                 ProgressView()
             case .success:
-                content($store.value)
+                if let binding = Binding($store.value) {
+                    content(binding)
+                }
             case .failure:
                 ContentUnavailableView(
                     "Unable to load content",

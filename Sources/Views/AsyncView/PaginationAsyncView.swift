@@ -45,31 +45,33 @@ public struct PaginationAsyncView<UI: Paginateable, Content: View>: View {
                     .padding(24)
                 
             case .success(let ui):
-                LazyVStack(spacing: 16) {
-                    content($store.value)
-                    
-                    if let cursor = ui.cursor, !loadingMore {
-                        ProgressView()
-                            .onAppear {
-                                Task { @MainActor in
-                                    loadingMore = true
-                                    
-                                    do {
-                                        try await dataAccessService.loadMore(endpoint: store.accessor, cursor: cursor)
-                                        loadingMore = false
-                                    } catch {
-                                        loggingService.error(error.localizedDescription)
+                if let binding = Binding($store.value) {
+                    LazyVStack(spacing: 16) {
+                        content(binding)
+                        
+                        if let cursor = ui.cursor, !loadingMore {
+                            ProgressView()
+                                .onAppear {
+                                    Task { @MainActor in
+                                        loadingMore = true
+                                        
+                                        do {
+                                            try await dataAccessService.loadMore(endpoint: store.accessor, cursor: cursor)
+                                            loadingMore = false
+                                        } catch {
+                                            loggingService.error(error.localizedDescription)
+                                        }
                                     }
                                 }
-                            }
-                    }
-                }.overlay {
-                    if ui.items.isEmpty {
-                        ContentUnavailableView(
-                            "Nothing here yet",
-                            systemImage: "tray"
-                        )
-                        .padding(.top, 100)
+                        }
+                    }.overlay {
+                        if ui.items.isEmpty {
+                            ContentUnavailableView(
+                                "Nothing here yet",
+                                systemImage: "tray"
+                            )
+                            .padding(.top, 100)
+                        }
                     }
                 }
                 

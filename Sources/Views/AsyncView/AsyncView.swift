@@ -26,7 +26,6 @@ public struct AsyncView<UI: DataAccessObject, Content: View>: View {
     }
     
     public var body: some View {
-        let _ = Self._printChanges()
         content(store)
             .task {
                 await store.send(.observe).finish()
@@ -42,10 +41,10 @@ public struct AsyncView<UI: DataAccessObject, Content: View>: View {
         @Bindable var binding = store
         
         VStack {
-            Text(binding.value.count, format: .number)
+            Text(binding.value?.count ?? 0, format: .number)
             
             Button("Update") {
-                binding.value.count += 1
+                binding.value?.count += 1
             }
         }
     }

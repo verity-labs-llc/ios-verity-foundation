@@ -41,6 +41,7 @@ let package = Package(
             name: "VLLogging",
             dependencies: [
                 .product(name: "Dependencies", package: "swift-dependencies"),
+                .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
             ],
             path: "Sources/Logging"
         ),
