@@ -30,6 +30,17 @@ public struct PaginationAsyncView<UI: Paginateable, Content: View>: View {
         self.content = content
     }
     
+    public init(
+        endpoint: DataAccessor<UI>,
+        @ViewBuilder content: @escaping (UI) -> Content
+    ) {
+        self.store = StoreOf<AsyncFeature<UI>>(initialState: .init(accessor: endpoint)) {
+            AsyncFeature()
+        }
+        
+        self.content = { content($0.wrappedValue) }
+    }
+    
     public var body: some View {
         ZStack {
             switch store.loadState {
