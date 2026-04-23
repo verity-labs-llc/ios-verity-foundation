@@ -3,4 +3,5 @@
 @_exported import VLFiles
 @_exported import VLHTTP
 @_exported import VLLogging
+@_exported import VLRouter
 @_exported import VLUtilities

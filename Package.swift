@@ -7,6 +7,7 @@ let package = Package(
     name: "VerityLabsFoundation",
     platforms: [
         .iOS(.v26),
+        .macOS(.v14),
     ],
     products: [
         .library(
@@ -25,6 +26,7 @@ let package = Package(
         .library(name: "VLHTTP", targets: ["VLHTTP"]),
         .library(name: "VLData", targets: ["VLData"]),
         .library(name: "VLUtilities", targets: ["VLUtilities"]),
+        .library(name: "VLRouter", targets: ["VLRouter"]),
     ],
     dependencies: [
         .package(url: "https://github.com/pointfreeco/swift-dependencies.git", .upToNextMajor(from: "1.3.9")),
@@ -92,6 +94,13 @@ let package = Package(
             path: "Sources/Utilities"
         ),
         .target(
+            name: "VLRouter",
+            dependencies: [
+                .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+            ],
+            path: "Sources/Router"
+        ),
+        .target(
             name: "VLServices",
             dependencies: [
                 .target(name: "VLLogging"),
@@ -100,6 +109,7 @@ let package = Package(
                 .target(name: "VLHTTP"),
                 .target(name: "VLData"),
                 .target(name: "VLUtilities"),
+                .target(name: "VLRouter"),
             ],
             path: "Sources/ServiceExports"
         ),
