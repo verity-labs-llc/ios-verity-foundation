@@ -8,19 +8,34 @@
 import ComposableArchitecture
 import SwiftUI
 
-public struct RouterView<Destination: RouterDestination, Content: View>: View {
+public struct RouterView<Destination: RouterDestination, Background: View, Content: View>: View {
     @State private var store: StoreOf<RouterFeature<Destination>>
     
     @Namespace private var routerNamespace
     
-    let background: Color?
+    let background: Background
     let content: (Destination, Namespace.ID) -> Content
     
-    public init(background: Color? = nil, routerService: NavigationRouter<Destination>, @ViewBuilder destination: @escaping (Destination, Namespace.ID) -> Content) {
+    public init(
+        background: Background,
+        routerService: NavigationRouter<Destination>,
+        @ViewBuilder destination: @escaping (Destination, Namespace.ID) -> Content
+    ) {
         self._store = SwiftUI.State(initialValue: StoreOf<RouterFeature>(initialState: .init()) {
             RouterFeature(routerService: routerService)
         })
         self.background = background
+        self.content = destination
+    }
+
+    public init(
+        routerService: NavigationRouter<Destination>,
+        @ViewBuilder destination: @escaping (Destination, Namespace.ID) -> Content
+    ) where Background == EmptyView {
+        self._store = SwiftUI.State(initialValue: StoreOf<RouterFeature>(initialState: .init()) {
+            RouterFeature(routerService: routerService)
+        })
+        self.background = EmptyView()
         self.content = destination
     }
     
@@ -30,7 +45,7 @@ public struct RouterView<Destination: RouterDestination, Content: View>: View {
                 .tint(.secondary)
                 .navigationDestination(for: Destination.self) { destination in
                     ZStack {
-                        background?
+                        background
                             .ignoresSafeArea()
                             .zIndex(0)
                         
