@@ -13,11 +13,11 @@ public struct RouterView<Destination: RouterDestination, Background: View, Conte
     
     @Namespace private var routerNamespace
     
-    let background: Background
+    let background: () -> Background
     let content: (Destination, Namespace.ID) -> Content
     
     public init(
-        background: Background,
+        @ViewBuilder background: @escaping () -> Background,
         routerService: NavigationRouter<Destination>,
         @ViewBuilder destination: @escaping (Destination, Namespace.ID) -> Content
     ) {
@@ -35,7 +35,7 @@ public struct RouterView<Destination: RouterDestination, Background: View, Conte
         self._store = SwiftUI.State(initialValue: StoreOf<RouterFeature>(initialState: .init()) {
             RouterFeature(routerService: routerService)
         })
-        self.background = EmptyView()
+        self.background = { EmptyView() }
         self.content = destination
     }
     
@@ -45,7 +45,7 @@ public struct RouterView<Destination: RouterDestination, Background: View, Conte
                 .tint(.secondary)
                 .navigationDestination(for: Destination.self) { destination in
                     ZStack {
-                        background
+                        background()
                             .ignoresSafeArea()
                             .zIndex(0)
                         
