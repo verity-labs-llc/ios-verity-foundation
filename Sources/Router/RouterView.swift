@@ -44,15 +44,13 @@ public struct RouterView<Destination: RouterDestination, Background: View, Conte
             ProgressView()
                 .tint(.secondary)
                 .navigationDestination(for: Destination.self) { destination in
-                    ZStack {
-                        background()
-                            .ignoresSafeArea()
-                            .zIndex(0)
-                        
-                        content(destination, routerNamespace)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .zIndex(1)
-                    }.environment(\.routerNamespace, routerNamespace)
+                    content(destination, routerNamespace)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background {
+                            background()
+                                .ignoresSafeArea()
+                        }
+                        .environment(\.routerNamespace, routerNamespace)
                 }
         }
         .overlay {
