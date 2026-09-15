@@ -79,14 +79,14 @@ public extension AlamofireHTTPService {
             dataRequest = session.request(request)
         }
 
-        if Output.self == EmptyResponse.self {
+        if Output.self == VLSharedModels.EmptyResponse.self {
             let response = await dataRequest
                 .validate(statusCode: 200...299)
                 .serializingData()
                 .response
             try checkForServerError(response: response.response, error: response.error)
             _ = try response.result.get()
-            return EmptyResponse() as! Output
+            return VLSharedModels.EmptyResponse() as! Output
         }
 
         if Output.self == AttributedString.self {
