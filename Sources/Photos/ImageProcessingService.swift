@@ -171,14 +171,37 @@ public final class DefaultImageProcessingService: ImageProcessingService, @unche
             location = nil
         }
 
-        let captureDateString = exifData?[kCGImagePropertyExifDateTimeOriginal] as? String
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy:MM:dd HH:mm:ss"
-        formatter.timeZone = .current
-
         return ProcessedImage.Metadata(
-            captureDate: captureDateString.flatMap { formatter.date(from: $0) },
+            captureDate: captureDate(from: exifData),
             location: location
         )
+    }
+
+    private func captureDate(from exifData: [CFString: Any]?) -> Date? {
+        let dateString = (exifData?[kCGImagePropertyExifDateTimeOriginal] as? String)
+            ?? (exifData?[kCGImagePropertyExifDateTimeDigitized] as? String)
+        guard let dateString else { return nil }
+
+        let offset = (exifData?[kCGImagePropertyExifOffsetTimeOriginal] as? String)
+            ?? (exifData?[kCGImagePropertyExifOffsetTimeDigitized] as? String)
+            ?? (exifData?[kCGImagePropertyExifOffsetTime] as? String)
+
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.timeZone = offset.flatMap(Self.timeZone(fromExifOffset:)) ?? .current
+        formatter.dateFormat = "yyyy:MM:dd HH:mm:ss"
+        return formatter.date(from: dateString)
+    }
+
+    private static func timeZone(fromExifOffset offset: String) -> TimeZone? {
+        let offset = offset.trimmingCharacters(in: .whitespaces)
+        guard let sign = offset.first, sign == "+" || sign == "-" else { return nil }
+        let parts = offset.dropFirst().split(separator: ":")
+        guard parts.count == 2, let hours = Int(parts[0]), let minutes = Int(parts[1]) else {
+            return nil
+        }
+        let seconds = (hours * 3600 + minutes * 60) * (sign == "-" ? -1 : 1)
+        return TimeZone(secondsFromGMT: seconds)
     }
 }
