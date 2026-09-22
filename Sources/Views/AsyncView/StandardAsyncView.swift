@@ -3,6 +3,7 @@ import VLQuery
 
 public struct StandardAsyncView<Value: Codable & Sendable, Content: View>: View {
     @Environment(\.queryClient) private var queryClient
+    @Environment(\.loadingPlaceholder) private var loadingPlaceholder
 
     private let fetch: Fetch<Value>
     private let content: (Binding<Value>) -> Content
@@ -27,8 +28,12 @@ public struct StandardAsyncView<Value: Codable & Sendable, Content: View>: View 
         QueryView(fetch) { query in
             switch query.status {
             case .pending:
-                ProgressView()
-                    .tint(.secondary)
+                if let loadingPlaceholder {
+                    loadingPlaceholder
+                } else {
+                    ProgressView()
+                        .tint(.secondary)
+                }
             case .success:
                 if let value = query.data {
                     content(
@@ -41,12 +46,14 @@ public struct StandardAsyncView<Value: Codable & Sendable, Content: View>: View 
                             }
                         )
                     )
+                    .environment(\.loadingPlaceholder, nil)
                 }
             case .failure:
-                ContentUnavailableView(
-                    "Unable to load content",
-                    systemImage: "exclamationmark.icloud"
-                )
+                LoadFailedView("Unable to load content") {
+                    await queryClient.invalidateQueries(
+                        matching: QueryFilter(key: fetch.key, exact: true)
+                    )
+                }
             }
         }
     }

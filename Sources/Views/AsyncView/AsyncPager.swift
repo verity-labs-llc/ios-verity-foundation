@@ -74,10 +74,11 @@ public struct AsyncPager<
                         }
                     }
                 case .failure:
-                    ContentUnavailableView(
-                        "Something went wrong",
-                        systemImage: "exclamationmark.icloud"
-                    )
+                    LoadFailedView {
+                        await queryClient.invalidateQueries(
+                            matching: QueryFilter(key: pagination.initial.key, exact: true)
+                        )
+                    }
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)

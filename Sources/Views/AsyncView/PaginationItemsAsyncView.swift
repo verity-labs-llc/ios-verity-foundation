@@ -9,6 +9,7 @@ public struct PaginationAsyncView<
     EmptyContent: View
 >: View where Item.ID: Sendable {
     @Environment(\.queryClient) private var queryClient
+    @Environment(\.loadingPlaceholder) private var loadingPlaceholder
     @State private var storage: PaginationStorage<Value, Item>
     @State private var failedCursor: String?
     @State private var loadingMore = false
@@ -37,9 +38,13 @@ public struct PaginationAsyncView<
         ZStack {
             switch storage.status {
             case .pending:
-                ProgressView()
-                    .tint(.secondary)
-                    .padding(24)
+                if let loadingPlaceholder {
+                    loadingPlaceholder
+                } else {
+                    ProgressView()
+                        .tint(.secondary)
+                        .padding(24)
+                }
             case .success:
                 if storage.itemIDs.isEmpty {
                     emptyContent()
@@ -63,12 +68,14 @@ public struct PaginationAsyncView<
                             loadingMoreView(cursor: storage.cursor)
                         }
                     }
+                    .environment(\.loadingPlaceholder, nil)
                 }
             case .failure:
-                ContentUnavailableView(
-                    "Something went wrong",
-                    systemImage: "exclamationmark.icloud"
-                )
+                LoadFailedView {
+                    await queryClient.invalidateQueries(
+                        matching: QueryFilter(key: pagination.initial.key, exact: true)
+                    )
+                }
             }
         }
         .frame(maxWidth: .infinity)
