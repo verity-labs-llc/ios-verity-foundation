@@ -68,6 +68,7 @@ public struct RouterView<Destination: RouterDestination, Background: View, Conte
             NavigationStack {
                 content(destination, routerNamespace)
             }
+            .modifier(SheetDetentsModifier(detents: destination.sheetDetents))
             .modifier(
                 RouterAlertModifier(
                     alert: store.presentedAlert,
@@ -142,6 +143,18 @@ private struct RouterAlertModifier: ViewModifier {
             if let message = alert.message {
                 Text(message)
             }
+        }
+    }
+}
+
+private struct SheetDetentsModifier: ViewModifier {
+    let detents: Set<PresentationDetent>?
+
+    func body(content: Content) -> some View {
+        if let detents {
+            content.presentationDetents(detents)
+        } else {
+            content
         }
     }
 }
