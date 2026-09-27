@@ -82,7 +82,7 @@ public extension AlamofireHTTPService {
         if Output.self == VLSharedModels.EmptyResponse.self {
             let response = await dataRequest
                 .validate(statusCode: 200...299)
-                .serializingData()
+                .serializingData(emptyResponseCodes: Set(200...299))
                 .response
             try checkForServerError(response: response.response, error: response.error)
             _ = try response.result.get()

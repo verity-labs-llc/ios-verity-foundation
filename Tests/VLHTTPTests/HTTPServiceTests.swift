@@ -2,6 +2,7 @@ import Alamofire
 import Combine
 import Foundation
 import Testing
+import VLSharedModels
 @testable import VLHTTP
 
 private struct TestResponse: Codable, Equatable, Sendable {
@@ -76,6 +77,23 @@ struct HTTPServiceTests {
         return AlamofireHTTPService(
             session: Session(configuration: configuration, eventMonitors: eventMonitors)
         )
+    }
+
+    @Test(arguments: [200, 201, 202, 204, 205])
+    func callAcceptsEmptySuccessResponse(statusCode: Int) async throws {
+        MockURLProtocol.handler = { request in
+            let response = HTTPURLResponse(
+                url: request.url!, statusCode: statusCode, httpVersion: nil, headerFields: nil
+            )!
+            return (response, Data())
+        }
+        defer { MockURLProtocol.handler = nil }
+
+        let endpoint = HTTPEndpoint<EmptyResponse>(
+            url: URL(string: "https://example.com/contact-us")!,
+            method: .post
+        )
+        _ = try await makeService().call(endpoint: endpoint)
     }
 
     @Test
