@@ -2,6 +2,9 @@ import Foundation
 
 extension QueryClient {
     public func fetch<Value: Sendable>(_ descriptor: Fetch<Value>) async throws -> Value {
+        if let previewState {
+            throw previewState == .failure ? QueryPreviewError.simulatedFailure : QueryPreviewError.loading
+        }
         let options = descriptor.options ?? defaultFetchOptions
         pruneExpiredRecords(now: .now)
 
@@ -22,6 +25,9 @@ extension QueryClient {
     }
 
     public func fetch<Value: Codable & Sendable>(_ descriptor: Fetch<Value>) async throws -> Value {
+        if let previewState {
+            throw previewState == .failure ? QueryPreviewError.simulatedFailure : QueryPreviewError.loading
+        }
         let options = descriptor.options ?? defaultFetchOptions
         pruneExpiredRecords(now: .now)
 

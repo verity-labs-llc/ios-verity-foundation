@@ -4,7 +4,13 @@ extension QueryClient {
     public nonisolated func observe<Value: Sendable>(
         _ descriptor: Fetch<Value>
     ) -> AsyncStream<QuerySnapshot<Value>> {
-        AsyncStream(bufferingPolicy: .bufferingNewest(1)) { continuation in
+        if let previewState {
+            return AsyncStream { continuation in
+                continuation.yield(previewState.snapshot(key: descriptor.key))
+                continuation.finish()
+            }
+        }
+        return AsyncStream(bufferingPolicy: .bufferingNewest(1)) { continuation in
             let observerID = UUID()
             let task = Task {
                 await self.addObserver(
@@ -29,7 +35,13 @@ extension QueryClient {
     public nonisolated func observe<Value: Codable & Sendable>(
         _ descriptor: Fetch<Value>
     ) -> AsyncStream<QuerySnapshot<Value>> {
-        AsyncStream(bufferingPolicy: .bufferingNewest(1)) { continuation in
+        if let previewState {
+            return AsyncStream { continuation in
+                continuation.yield(previewState.snapshot(key: descriptor.key))
+                continuation.finish()
+            }
+        }
+        return AsyncStream(bufferingPolicy: .bufferingNewest(1)) { continuation in
             let observerID = UUID()
             let task = Task {
                 await self.addPersistentObserver(

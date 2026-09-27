@@ -3,6 +3,8 @@ import Foundation
 public actor QueryClient {
     public static let shared = QueryClient()
 
+    nonisolated let previewState: QueryPreviewState?
+
     var records: [QueryKey: QueryRecord] = [:]
     var observers: [QueryKey: [UUID: QueryObserver]] = [:]
     var observerKeys: [UUID: QueryKey] = [:]
@@ -14,8 +16,10 @@ public actor QueryClient {
 
     public init(
         defaultFetchOptions: FetchOptions = FetchOptions(),
-        defaultMutationOptions: MutationDefaultOptions = MutationDefaultOptions()
+        defaultMutationOptions: MutationDefaultOptions = MutationDefaultOptions(),
+        previewState: QueryPreviewState? = nil
     ) {
+        self.previewState = previewState
         self.defaultFetchOptions = defaultFetchOptions
         self.defaultMutationOptions = defaultMutationOptions
         self.defaultStorage = defaultFetchOptions.storage

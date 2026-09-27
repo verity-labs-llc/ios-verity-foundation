@@ -485,3 +485,29 @@ await queryClient.clear()
 
 Removing or clearing data publishes a pending snapshot to active observers and keeps those
 observers attached. It does not automatically refetch removed data.
+
+## Preview states
+
+Apply one state to every query below a preview root, including pagination:
+
+```swift
+#Preview("Loading") {
+    MyScreen()
+        .queryPreviewState(.loading)
+}
+
+#Preview("Failure") {
+    MyScreen()
+        .queryPreviewState(.failure)
+}
+```
+
+Both modes skip fetch operations, retries, and persistence reads. Retry actions remain in the
+chosen state. Explicit `client.fetch` calls throw `QueryPreviewError` instead of fetching.
+Each modifier owns an isolated client; the shared client is unchanged. Changing the mode
+recreates the preview subtree. Apply `.queryPreviewState(nil)` inside a subtree to restore
+normal fetching with a separate client. Existing sample fetches provide success and empty
+states, since the package cannot manufacture arbitrary model values.
+
+For non-view previews, use `QueryClient(previewState: .loading)` and inject it with
+`.queryClient(client)`. Mutations are not overridden.
