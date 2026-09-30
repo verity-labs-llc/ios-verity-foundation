@@ -25,11 +25,17 @@ public final class DefaultImageProcessingService: ImageProcessingService, @unche
     private let fileService: FileService
 
     private let semaphore = AsyncSemaphore(maxConcurrent: 4)
-    private let maxDimension: CGFloat = 1200
-    private let compressionQuality: CGFloat = 0.8
+    private let maxDimension: CGFloat
+    private let compressionQuality: CGFloat
 
-    public init(fileService: FileService) {
+    public init(
+        fileService: FileService,
+        maxDimension: CGFloat = 1200,
+        compressionQuality: CGFloat = 0.8
+    ) {
         self.fileService = fileService
+        self.maxDimension = maxDimension
+        self.compressionQuality = compressionQuality
     }
     
     public func processPickerItem(_ item: PhotosPickerItem) async throws -> ProcessedImage {
