@@ -67,8 +67,10 @@ public struct VLRemoteImage<RequestModifier: AsyncImageDownloadRequestModifier, 
             KFImage.url(url, cacheKey: cacheKey)
                 .cacheOriginalImage()
                 .requestModifier(requestModifier)
+                .loadDiskFileSynchronously()
                 .backgroundDecode()
                 .setProcessor(DownsamplingImageProcessor(size: downsamplingSize(for: size)))
+                .fade(duration: 0.2)
                 .resizable()
                 .onFailureView { failureContent() }
                 .placeholder { placeholderContent() }
@@ -84,11 +86,13 @@ public struct VLRemoteImage<RequestModifier: AsyncImageDownloadRequestModifier, 
     }
 
     private func downsamplingSize(for size: CGSize) -> CGSize {
-        CGSize(
-            width: ceil(max(size.width, 1) * scale),
-            height: ceil(max(size.height, 1) * scale)
-        )
+        let longestSide = max(size.width, size.height, 1) * scale
+        let target = contentMode == .fill ? longestSide * 1.34 : longestSide
+        let bucket = Self.sizeBuckets.first { $0 >= target } ?? Self.sizeBuckets.last!
+        return CGSize(width: bucket, height: bucket)
     }
+
+    private static var sizeBuckets: [CGFloat] { [200, 400, 800, 1200, 1600, 2400] }
 }
 
 public extension VLRemoteImage where Placeholder == EmptyView, Failure == EmptyView {
